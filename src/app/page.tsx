@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {Suspense, unstable_postpone as postpone, useState, useTransition} from "react";
+import {useState} from "react";
 
 const PRODUCTS = [
   {
@@ -78,53 +78,40 @@ const PRODUCTS = [
   },
 ];
 
-function HomePage() {
-  const [Skeleton, setSkeleton] = useState<() => React.ReactNode>(() => () => null);
-  const [, startTransition] = useTransition();
+export default function HomePage() {
+  const [skeleton, setSkeleton] = useState<React.ReactNode>(null);
+
+  if (skeleton) return skeleton;
 
   return (
-    <Suspense fallback={<Skeleton />}>
-      <main>
-        <div className="grid grid-cols-3 gap-4">
-          {PRODUCTS.map((product) => (
-            <div key={product.id} className="grid gap-2 rounded-md bg-foreground/5 p-4">
-              <h2 className="text-xl font-medium">{product.name}</h2>
-              <p className="text-sm text-foreground/80">{product.description}</p>
-              <p>
-                {Number(product.price).toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                })}
-              </p>
-              <Link
-                href={`/${product.id}`}
-                prefetch={false}
-                onClick={() => {
-                  startTransition(async () => {
-                    const NewSkeleton = (await import("@/app/[id]/loading")).default;
+    <main>
+      <div className="grid grid-cols-3 gap-4">
+        {PRODUCTS.map((product) => (
+          <div key={product.id} className="grid gap-2 rounded-md bg-foreground/5 p-4">
+            <h2 className="text-xl font-medium">{product.name}</h2>
+            <p className="text-sm text-foreground/80">{product.description}</p>
+            <p>
+              {Number(product.price).toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+              })}
+            </p>
+            <Link
+              href={`/${product.id}`}
+              prefetch={false}
+              onClick={async () => {
+                const skeleton = (await import("@/app/[id]/loading")).default;
 
-                    setSkeleton(NewSkeleton);
-
-                    postpone("client only");
-                  });
-                }}
-              >
-                <button className="w-full" type="button">
-                  See more
-                </button>
-              </Link>
-            </div>
-          ))}
-        </div>
-      </main>
-    </Suspense>
-  );
-}
-
-export default function HomePageContainer() {
-  return (
-    <Suspense fallback={<div>Safe suspense</div>}>
-      <HomePage />
-    </Suspense>
+                setSkeleton(skeleton);
+              }}
+            >
+              <button className="w-full" type="button">
+                See more
+              </button>
+            </Link>
+          </div>
+        ))}
+      </div>
+    </main>
   );
 }

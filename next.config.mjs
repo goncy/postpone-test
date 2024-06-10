@@ -2,10 +2,6 @@
 const nextConfig = {
   experimental: {
     reactCompiler: true,
-    ppr: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
   },
   logging: {
     fetches: {
