@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {useState} from "react";
+import {useLayoutEffect, useRef, useState} from "react";
 
 const PRODUCTS = [
   {
@@ -80,6 +80,15 @@ const PRODUCTS = [
 
 export default function HomePage() {
   const [skeleton, setSkeleton] = useState<React.ReactNode>(null);
+  const isMounted = useRef(false);
+
+  useLayoutEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   if (skeleton) return skeleton;
 
@@ -102,7 +111,11 @@ export default function HomePage() {
               onClick={async () => {
                 const skeleton = (await import("@/app/[id]/loading")).default;
 
-                setSkeleton(skeleton);
+                setTimeout(() => {
+                  if (isMounted.current) {
+                    setSkeleton(skeleton);
+                  }
+                }, 100);
               }}
             >
               <button className="w-full" type="button">
